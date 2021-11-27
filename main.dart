@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:developer';
 
 final userProvider = StateProvider((ref) {
   return FirebaseAuth.instance.currentUser;
@@ -19,6 +18,10 @@ final emailProvider = StateProvider.autoDispose((ref) {
 
 final passwordProvider = StateProvider.autoDispose((ref) {
   return '';
+});
+
+final btmnavIndexProvider = StateProvider.autoDispose((ref) {
+  return 0;
 });
 
 void main() async {
@@ -51,6 +54,24 @@ class HomePage extends StatelessWidget {
   }
 }
 
+class NewsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return (FirebaseAuth.instance.currentUser == null)
+        ? UnAuthPage()
+        : _NewsPage();
+  }
+}
+
+class UserPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return (FirebaseAuth.instance.currentUser == null)
+        ? UnAuthPage()
+        : _UserPage();
+  }
+}
+
 class UnAuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -78,7 +99,7 @@ class UnAuthPage extends StatelessWidget {
                   onPressed: () async {
                     await Navigator.of(context)
                         .pushReplacement(MaterialPageRoute(builder: (context) {
-                      return AuthPage();
+                      return LogInPage();
                     }));
                   },
                   child: Text('ログイン'),
@@ -96,7 +117,7 @@ class UnAuthPage extends StatelessWidget {
                     onPressed: () async {
                       await Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (context) {
-                        return AuthPage();
+                        return RegisterPage();
                       }));
                     },
                     child: Text('会員登録'),
@@ -113,7 +134,7 @@ class UnAuthPage extends StatelessWidget {
   }
 }
 
-class AuthPage extends ConsumerWidget {
+class LogInPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final infoText = ref.watch(infoTextProvider.state).state;
@@ -121,7 +142,83 @@ class AuthPage extends ConsumerWidget {
     final password = ref.watch(passwordProvider.state).state;
     return Scaffold(
       appBar: AppBar(
-        title: Text('スタンプカードアプリ'),
+        title: Text('ログインページ'),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () async {
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return UnAuthPage();
+                }),
+              );
+            },
+            icon: Icon(Icons.close_sharp),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Container(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextFormField(
+                decoration: InputDecoration(labelText: 'メールアドレス'),
+                onChanged: (String value) {
+                  ref.read(emailProvider.state).state = value;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'パスワード'),
+                obscureText: true,
+                onChanged: (String value) {
+                  ref.read(passwordProvider.state).state = value;
+                },
+              ),
+              Container(
+                padding: EdgeInsets.all(8),
+                child: Text(infoText),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                child: OutlinedButton(
+                  child: Text('ログイン'),
+                  onPressed: () async {
+                    try {
+                      final FirebaseAuth auth = FirebaseAuth.instance;
+                      final result = await auth.signInWithEmailAndPassword(
+                          email: email, password: password);
+                      ref.read(userProvider.state).state = result.user;
+                      await Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) {
+                          return QRPage();
+                        }),
+                      );
+                    } catch (e) {
+                      ref.read(infoTextProvider.state).state =
+                          "ログインに失敗しました:${e.toString()}";
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class RegisterPage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final infoText = ref.watch(infoTextProvider.state).state;
+    final email = ref.watch(emailProvider.state).state;
+    final password = ref.watch(passwordProvider.state).state;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('会員登録ページ'),
         actions: <Widget>[
           IconButton(
             onPressed: () async {
@@ -179,29 +276,6 @@ class AuthPage extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                child: OutlinedButton(
-                  child: Text('ログイン'),
-                  onPressed: () async {
-                    try {
-                      final FirebaseAuth auth = FirebaseAuth.instance;
-                      final result = await auth.signInWithEmailAndPassword(
-                          email: email, password: password);
-                      ref.read(userProvider.state).state = result.user;
-                      await Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) {
-                          return QRPage();
-                        }),
-                      );
-                    } catch (e) {
-                      ref.read(infoTextProvider.state).state =
-                          "ログインに失敗しました:${e.toString()}";
-                    }
-                  },
-                ),
-              ),
             ],
           ),
         ),
@@ -213,26 +287,126 @@ class AuthPage extends ConsumerWidget {
 class QRPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('QRコードがここに入ります。'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('QRコード'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return UnAuthPage();
+                }),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text('QRコードがここに入ります。'),
+      ),
+      bottomNavigationBar: BottomNav(),
     );
   }
 }
 
-class BottomNav extends StatelessWidget {
+class _NewsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('ショップニュース'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return UnAuthPage();
+                }),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text('ショップからのお知らせ'),
+      ),
+      bottomNavigationBar: BottomNav(),
+    );
+  }
+}
+
+class _UserPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('ユーザー情報'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return UnAuthPage();
+                }),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text('ユーザー情報がここに入ります。'),
+      ),
+      bottomNavigationBar: BottomNav(),
+    );
+  }
+}
+
+class BottomNav extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      currentIndex: 0,
+      currentIndex: ref.read(btmnavIndexProvider.state).state,
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(icon: Icon(Icons.home_sharp), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.info_sharp), label: 'Info'),
+        BottomNavigationBarItem(icon: Icon(Icons.info_sharp), label: 'News'),
         BottomNavigationBarItem(icon: Icon(Icons.people_sharp), label: 'User'),
       ],
-      onTap: (int index) {},
+      onTap: (int index) async {
+        switch (index) {
+          case 0:
+            ref.watch(btmnavIndexProvider.state).state = index;
+            await Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return HomePage();
+            }));
+            break;
+          case 1:
+            ref.watch(btmnavIndexProvider.state).state = index;
+            await Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return NewsPage();
+            }));
+
+            break;
+          case 2:
+            ref.watch(btmnavIndexProvider.state).state = index;
+            await Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return UserPage();
+            }));
+            break;
+        }
+      },
     );
   }
 }
