@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 final userProvider = StateProvider((ref) {
   return FirebaseAuth.instance.currentUser;
@@ -18,6 +19,10 @@ final emailProvider = StateProvider.autoDispose((ref) {
 
 final passwordProvider = StateProvider.autoDispose((ref) {
   return '';
+});
+
+final currentPageProvider = StateProvider.autoDispose((ref) {
+  return 0;
 });
 
 final btmnavIndexProvider = StateProvider.autoDispose((ref) {
@@ -45,12 +50,60 @@ class StanpCardApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+        appBar: (FirebaseAuth.instance.currentUser != null)
+            ? AppBar(
+                title: PageMap[ref.watch(btmnavIndexProvider.state).state]
+                    ['title'],
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.logout_sharp),
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      await Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) {
+                          return HomePage();
+                        }),
+                      );
+                    },
+                  ),
+                ],
+              )
+            : AppBar(
+                title: Text('トップページ'),
+              ),
+        body: PageMap[ref.watch(btmnavIndexProvider.state).state]['page'],
+        bottomNavigationBar: (FirebaseAuth.instance.currentUser != null)
+            ? NavigationBarList[true]
+            : NavigationBarList[false]);
+  }
+}
+
+final List<Map<String, dynamic>> PageMap = [
+  {
+    'title': const Text('トップページ'),
+    'page': QRPage(),
+  },
+  {
+    'title': const Text('ニュースペース'),
+    'page': NewsPage(),
+  },
+  {
+    'title': const Text('ユーザーページ'),
+    'page': UserPage(),
+  },
+];
+final Map<bool, Widget?> NavigationBarList = {true: BottomNav(), false: null};
+
+class QRPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return (FirebaseAuth.instance.currentUser == null)
         ? UnAuthPage()
-        : QRPage();
+        : _QRPage();
   }
 }
 
@@ -72,64 +125,60 @@ class UserPage extends StatelessWidget {
   }
 }
 
-class UnAuthPage extends StatelessWidget {
+class UnAuthPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('スタンプカードアプリ'),
-      ),
-      body: Center(
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(8),
-                alignment: Alignment.center,
-                child: Text('ログインまたは会員登録をしてください。'),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(8),
+              alignment: Alignment.center,
+              child: Text('ログインまたは会員登録をしてください。'),
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            Container(
+              padding: EdgeInsets.all(8),
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) {
+                      return LogInPage();
+                    }),
+                  );
+                },
+                child: Text('ログイン'),
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all(Size(130, 40.0))),
               ),
-              const SizedBox(
-                height: 25,
-              ),
-              Container(
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Container(
                 padding: EdgeInsets.all(8),
                 alignment: Alignment.center,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await Navigator.of(context)
-                        .pushReplacement(MaterialPageRoute(builder: (context) {
-                      return LogInPage();
-                    }));
-                  },
-                  child: Text('ログイン'),
-                  style: ButtonStyle(
-                      minimumSize: MaterialStateProperty.all(Size(130, 40.0))),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                  padding: EdgeInsets.all(8),
-                  alignment: Alignment.center,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) {
+                    await Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) {
                         return RegisterPage();
-                      }));
-                    },
-                    child: Text('会員登録'),
-                    style: ButtonStyle(
-                        minimumSize:
-                            MaterialStateProperty.all(Size(130.0, 40.0))),
-                  )),
-            ],
-          ),
+                      }),
+                    );
+                  },
+                  child: Text('会員登録'),
+                  style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all(Size(130.0, 40.0))),
+                )),
+          ],
         ),
       ),
-      bottomNavigationBar: BottomNav(),
     );
   }
 }
@@ -143,16 +192,16 @@ class LogInPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('ログインページ'),
-        actions: <Widget>[
+        actions: [
           IconButton(
+            icon: Icon(Icons.close_sharp),
             onPressed: () async {
               await Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) {
-                  return UnAuthPage();
+                  return HomePage();
                 }),
               );
             },
-            icon: Icon(Icons.close_sharp),
           ),
         ],
       ),
@@ -192,7 +241,7 @@ class LogInPage extends ConsumerWidget {
                       ref.read(userProvider.state).state = result.user;
                       await Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) {
-                          return QRPage();
+                          return HomePage();
                         }),
                       );
                     } catch (e) {
@@ -218,17 +267,17 @@ class RegisterPage extends ConsumerWidget {
     final password = ref.watch(passwordProvider.state).state;
     return Scaffold(
       appBar: AppBar(
-        title: Text('会員登録ページ'),
-        actions: <Widget>[
+        title: Text('ログインページ'),
+        actions: [
           IconButton(
+            icon: Icon(Icons.close_sharp),
             onPressed: () async {
               await Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) {
-                  return UnAuthPage();
+                  return HomePage();
                 }),
               );
             },
-            icon: Icon(Icons.close_sharp),
           ),
         ],
       ),
@@ -267,7 +316,7 @@ class RegisterPage extends ConsumerWidget {
                       ref.read(userProvider.state).state = result.user;
                       await Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (context) {
-                        return QRPage();
+                        return HomePage();
                       }));
                     } catch (e) {
                       ref.read(infoTextProvider.state).state =
@@ -284,30 +333,23 @@ class RegisterPage extends ConsumerWidget {
   }
 }
 
-class QRPage extends StatelessWidget {
+class _QRPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('QRコード'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              await Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) {
-                  return UnAuthPage();
-                }),
-              );
-            },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.read(userProvider.state).state;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          QrImage(
+            data: user!.uid,
+            version: QrVersions.auto,
+            size: 200.0,
           ),
+          const SizedBox(height: 15.0),
+          Text('ここにポイント数が表示されます'),
         ],
       ),
-      body: Center(
-        child: Text('QRコードがここに入ります。'),
-      ),
-      bottomNavigationBar: BottomNav(),
     );
   }
 }
@@ -315,55 +357,74 @@ class QRPage extends StatelessWidget {
 class _NewsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('ショップニュース'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              await Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) {
-                  return UnAuthPage();
-                }),
-              );
-            },
+    return ListView(
+      children: [
+        Card(
+          margin:
+              EdgeInsets.only(top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'ここにショップからのお知らせが入ります。',
+              style: TextStyle(fontSize: 15),
+            ),
           ),
-        ],
-      ),
-      body: Center(
-        child: Text('ショップからのお知らせ'),
-      ),
-      bottomNavigationBar: BottomNav(),
+        ),
+        Card(
+          margin:
+              EdgeInsets.only(top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'ここにショップからのお知らせが入ります。',
+              style: TextStyle(fontSize: 15),
+            ),
+          ),
+        ),
+        Card(
+          margin:
+              EdgeInsets.only(top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'ここにショップからのお知らせが入ります。',
+              style: TextStyle(fontSize: 15),
+            ),
+          ),
+        ),
+        Card(
+          margin:
+              EdgeInsets.only(top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'ここにショップからのお知らせが入ります。',
+              style: TextStyle(fontSize: 15),
+            ),
+          ),
+        ),
+        Card(
+          margin:
+              EdgeInsets.only(top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'ここにショップからのお知らせが入ります。',
+              style: TextStyle(fontSize: 15),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _UserPage extends StatelessWidget {
+class _UserPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('ユーザー情報'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              await Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) {
-                  return UnAuthPage();
-                }),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Text('ユーザー情報がここに入ります。'),
-      ),
-      bottomNavigationBar: BottomNav(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.read(userProvider.state).state;
+    return Center(
+      child: Text('ユーザー情報 : ${user!.email}'),
     );
   }
 }
@@ -385,25 +446,13 @@ class BottomNav extends ConsumerWidget {
         switch (index) {
           case 0:
             ref.watch(btmnavIndexProvider.state).state = index;
-            await Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return HomePage();
-            }));
             break;
           case 1:
             ref.watch(btmnavIndexProvider.state).state = index;
-            await Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return NewsPage();
-            }));
 
             break;
           case 2:
             ref.watch(btmnavIndexProvider.state).state = index;
-            await Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return UserPage();
-            }));
             break;
         }
       },
