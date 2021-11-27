@@ -79,7 +79,7 @@ class HomePage extends ConsumerWidget {
                 ],
               )
             : AppBar(
-                title: Text('トップページ'),
+                title: Text('認証ページ'),
               ),
         body: PageMap[ref.watch(btmnavIndexProvider.state).state]['page'],
         bottomNavigationBar: (FirebaseAuth.instance.currentUser != null)
