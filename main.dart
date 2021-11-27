@@ -21,8 +21,14 @@ final passwordProvider = StateProvider.autoDispose((ref) {
   return '';
 });
 
-final currentPageProvider = StateProvider.autoDispose((ref) {
-  return 0;
+final pointProvider = StreamProvider.autoDispose((ref) async* {
+  final User user = FirebaseAuth.instance.currentUser!;
+  yield FirebaseFirestore.instance
+      .collection('v0')
+      .doc('stanp')
+      .collection('users')
+      .where('uid', isEqualTo: user.uid)
+      .snapshots();
 });
 
 final btmnavIndexProvider = StateProvider.autoDispose((ref) {
@@ -84,15 +90,15 @@ class HomePage extends ConsumerWidget {
 
 final List<Map<String, dynamic>> PageMap = [
   {
-    'title': const Text('トップページ'),
+    'title': const Text('トップ'),
     'page': QRPage(),
   },
   {
-    'title': const Text('ニュースペース'),
+    'title': const Text('お知らせ'),
     'page': NewsPage(),
   },
   {
-    'title': const Text('ユーザーページ'),
+    'title': const Text('ユーザー'),
     'page': UserPage(),
   },
 ];
@@ -337,6 +343,8 @@ class _QRPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.read(userProvider.state).state;
+    final point =
+        (ref.read(pointProvider) == null) ? ref.read(pointProvider) : 0;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -347,7 +355,7 @@ class _QRPage extends ConsumerWidget {
             size: 200.0,
           ),
           const SizedBox(height: 15.0),
-          Text('ここにポイント数が表示されます'),
+          Text('現在のポイント : ${point}'),
         ],
       ),
     );
@@ -438,9 +446,9 @@ class BottomNav extends ConsumerWidget {
       selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.grey,
       items: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home_sharp), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.info_sharp), label: 'News'),
-        BottomNavigationBarItem(icon: Icon(Icons.people_sharp), label: 'User'),
+        BottomNavigationBarItem(icon: Icon(Icons.home_sharp), label: 'トップ'),
+        BottomNavigationBarItem(icon: Icon(Icons.info_sharp), label: 'お知らせ'),
+        BottomNavigationBarItem(icon: Icon(Icons.people_sharp), label: 'ユーザー'),
       ],
       onTap: (int index) async {
         switch (index) {
