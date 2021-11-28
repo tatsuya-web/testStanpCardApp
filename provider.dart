@@ -28,6 +28,14 @@ final pointProvider = StreamProvider.autoDispose((ref) {
       .snapshots();
 });
 
+final newsProvider = StreamProvider.autoDispose((ref) {
+  return FirebaseFirestore.instance
+      .collection('v0')
+      .doc('stanp')
+      .collection('news')
+      .snapshots();
+});
+
 final currentIndexProvider = StateProvider.autoDispose((ref) {
   return 0;
 });
