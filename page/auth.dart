@@ -223,7 +223,7 @@ class RegisterPage extends ConsumerWidget {
                         'createDate': date,
                         'updateDate': null,
                         'loginDate': date,
-                        'stanpDate': date,
+                        'stanpDate': null,
                         'email': userEmail,
                         'point': 0,
                         'uid': userId,

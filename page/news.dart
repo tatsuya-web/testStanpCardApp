@@ -44,37 +44,5 @@ class _NewsPage extends ConsumerWidget {
         return Text(e.toString());
       },
     );
-    // return ListView(
-    //   children: <Widget>[
-    //     asyncNewsQuery.when(
-    //       data: (QuerySnapshot query) {
-    //         query.docs.map(
-    //           (document) {
-    //             final title = query.docs.map((docuemnt) {
-    //               return document['title'];
-    //             });
-    //             final date = query.docs.map((document) {
-    //               return document['date'];
-    //             });
-    //             return Card(
-    //               margin: const EdgeInsets.only(
-    //                   top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
-    //               child: ListTile(
-    //                 title: Text('$title'),
-    //                 subtitle: Text('$date'),
-    //               ),
-    //             );
-    //           },
-    //         );
-    //       },
-    //       loading: () {
-    //         return const Text('読込中...');
-    //       },
-    //       error: (e, stackTrace) {
-    //         return Text(e.toString());
-    //       },
-    //     ),
-    //   ],
-    // );
   }
 }
