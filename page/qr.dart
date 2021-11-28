@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,8 +21,7 @@ class _QRPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.read(userProvider.state).state;
-    final point =
-        (ref.read(pointProvider) == null) ? ref.read(pointProvider) : 0;
+    final AsyncValue<QuerySnapshot> asyncPointQuery = ref.watch(pointProvider);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -32,9 +32,24 @@ class _QRPage extends ConsumerWidget {
             size: 200.0,
           ),
           const SizedBox(height: 15.0),
-          Text(
-            '現在のポイント : $point',
-            style: const TextStyle(fontSize: 17),
+          asyncPointQuery.when(
+            data: (QuerySnapshot query) {
+              final Object point = (query == null)
+                  ? 0
+                  : query.docs.map((document) {
+                      return document['point'];
+                    });
+              return Text(
+                '現在のポイント : $point',
+                style: const TextStyle(fontSize: 17),
+              );
+            },
+            loading: () {
+              return const Text('読込中...');
+            },
+            error: (e, stackTrace) {
+              return Text(e.toString());
+            },
           ),
         ],
       ),

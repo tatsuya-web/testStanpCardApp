@@ -18,9 +18,9 @@ final passwordProvider = StateProvider.autoDispose((ref) {
   return '';
 });
 
-final pointProvider = StreamProvider.autoDispose((ref) async* {
+final pointProvider = StreamProvider.autoDispose((ref) {
   final User user = FirebaseAuth.instance.currentUser!;
-  yield FirebaseFirestore.instance
+  return FirebaseFirestore.instance
       .collection('v0')
       .doc('stanp')
       .collection('users')

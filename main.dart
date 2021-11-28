@@ -25,7 +25,7 @@ final List<Map<String, dynamic>> pageMap = [
   },
 ];
 
-final Map<bool, Widget?> navigationBarList = {
+final Map<bool, Widget?> navigationBarMap = {
   true: const BottomNav(),
   false: null
 };
@@ -45,7 +45,7 @@ class StanpCardApp extends StatelessWidget {
     return MaterialApp(
       title: 'StanpCardApp',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey,
       ),
       home: const HomePage(),
     );
@@ -78,7 +78,7 @@ class HomePage extends ConsumerWidget {
             : null,
         body: pageMap[ref.watch(currentIndexProvider.state).state]['page'],
         bottomNavigationBar: (FirebaseAuth.instance.currentUser != null)
-            ? navigationBarList[true]
-            : navigationBarList[false]);
+            ? navigationBarMap[true]
+            : navigationBarMap[false]);
   }
 }

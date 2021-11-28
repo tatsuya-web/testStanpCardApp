@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../provider.dart';
@@ -74,7 +75,7 @@ class LogInPage extends ConsumerWidget {
     final password = ref.watch(passwordProvider.state).state;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ログインページ'),
+        title: const Text('ログイン'),
         actions: [
           IconButton(
             icon: const Icon(Icons.close_sharp),
@@ -122,6 +123,17 @@ class LogInPage extends ConsumerWidget {
                       final result = await auth.signInWithEmailAndPassword(
                           email: email, password: password);
                       ref.read(userProvider.state).state = result.user;
+
+                      final userEmail = result.user!.email;
+                      final loginDate =
+                          DateTime.now().toLocal().toIso8601String();
+                      await FirebaseFirestore.instance
+                          .collection('v0')
+                          .doc('stanp')
+                          .collection('users')
+                          .doc(userEmail)
+                          .update({'loginDate': loginDate});
+
                       await Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) {
                           return const HomePage();
@@ -151,7 +163,7 @@ class RegisterPage extends ConsumerWidget {
     final password = ref.watch(passwordProvider.state).state;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ログインページ'),
+        title: const Text('会員登録'),
         actions: [
           IconButton(
             icon: const Icon(Icons.close_sharp),
@@ -198,6 +210,25 @@ class RegisterPage extends ConsumerWidget {
                       final result = await auth.createUserWithEmailAndPassword(
                           email: email, password: password);
                       ref.read(userProvider.state).state = result.user;
+
+                      final date = DateTime.now().toLocal().toIso8601String();
+                      final userId = result.user?.uid;
+                      final userEmail = result.user?.email;
+                      await FirebaseFirestore.instance
+                          .collection('v0')
+                          .doc('stanp')
+                          .collection('users')
+                          .doc(userEmail)
+                          .set({
+                        'createDate': date,
+                        'updateDate': null,
+                        'loginDate': date,
+                        'stanpDate': date,
+                        'email': userEmail,
+                        'point': 0,
+                        'uid': userId,
+                      });
+
                       await Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (context) {
                         return const HomePage();
