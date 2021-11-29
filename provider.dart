@@ -18,6 +18,10 @@ final passwordProvider = StateProvider.autoDispose((ref) {
   return '';
 });
 
+final currentIndexProvider = StateProvider.autoDispose((ref) {
+  return 0;
+});
+
 final pointProvider = StreamProvider.autoDispose((ref) {
   final User user = FirebaseAuth.instance.currentUser!;
   return FirebaseFirestore.instance
@@ -33,9 +37,10 @@ final newsProvider = StreamProvider.autoDispose((ref) {
       .collection('v0')
       .doc('stanp')
       .collection('news')
+      .orderBy('date', descending: true)
       .snapshots();
 });
 
-final currentIndexProvider = StateProvider.autoDispose((ref) {
-  return 0;
+final singleNewsProvider = StateProvider((ref) {
+  return '';
 });
