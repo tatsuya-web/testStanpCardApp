@@ -31,14 +31,14 @@ class _NewsPage extends ConsumerWidget {
               child: ListTile(
                 title: Text(
                   document['title'],
-                  style: TextStyle(fontSize: 22.0),
+                  style: const TextStyle(fontSize: 22.0),
                 ),
                 subtitle: Text(document['date'].toString()),
                 onTap: () async {
                   ref.watch(singleNewsProvider.state).state = document.id;
                   await Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) {
-                      return _SingleNewsPage();
+                      return const _SingleNewsPage();
                     }),
                   );
                 },
@@ -71,10 +71,6 @@ class _SingleNewsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final newsID = ref.watch(singleNewsProvider.state).state;
-    // final news = FirebaseFirestore.instance
-    //     .collection('v0')
-    //     .doc('stanp')
-    //     .collection('news');
 
     return FutureBuilder(
         future: FirebaseFirestore.instance
