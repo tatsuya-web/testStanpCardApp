@@ -4,16 +4,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../provider.dart';
-import '../main.dart';
+// import '../main.dart';
 import './auth.dart';
 
-class NewsPage extends StatelessWidget {
+final List<Widget> newsPageList = [
+  _NewsPage(),
+  const _SingleNewsPage(),
+];
+
+class NewsPage extends ConsumerWidget {
   const NewsPage({Key? key}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return (FirebaseAuth.instance.currentUser == null)
         ? const UnAuthPage()
-        : _NewsPage();
+        : newsPageList[ref.watch(newsInnerPageProvider.state).state];
   }
 }
 
@@ -27,7 +32,7 @@ class _NewsPage extends ConsumerWidget {
           children: query.docs.map((document) {
             return Card(
               margin: const EdgeInsets.only(
-                  top: 12.0, left: 10.0, bottom: 0.0, right: 10.0),
+                  top: 12.0, left: 20.0, bottom: 0.0, right: 20.0),
               child: ListTile(
                 title: Text(
                   document['title'],
@@ -36,11 +41,12 @@ class _NewsPage extends ConsumerWidget {
                 subtitle: Text(document['date'].toString()),
                 onTap: () async {
                   ref.watch(singleNewsProvider.state).state = document.id;
-                  await Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) {
-                      return const _SingleNewsPage();
-                    }),
-                  );
+                  ref.watch(newsInnerPageProvider.state).state = 1;
+                  // await Navigator.of(context).pushReplacement(
+                  //   MaterialPageRoute(builder: (context) {
+                  //     return const _SingleNewsPage();
+                  //   }),
+                  // );
                 },
               ),
             );
@@ -84,48 +90,74 @@ class _SingleNewsPage extends ConsumerWidget {
           if (snapshot.connectionState == ConnectionState.done) {
             Map<String, dynamic> post =
                 snapshot.data!.data() as Map<String, dynamic>;
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('お知らせ'),
-                leading: IconButton(
-                  icon: const Icon(Icons.close_sharp),
-                  onPressed: () async {
-                    ref.watch(currentIndexProvider.state).state = 1;
-                    await Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) {
-                        return const HomePage();
-                      }),
-                    );
-                  },
-                ),
-              ),
-              body: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.only(
-                        top: 35.0, right: 30.0, bottom: 0.0, left: 30.0),
-                    child: ListTile(
-                      title: Text(
-                        post['title'],
-                        style: const TextStyle(fontSize: 25.0),
-                      ),
-                      subtitle: Text(
-                        post['date'],
-                        style: const TextStyle(fontSize: 16.0),
-                      ),
+            return Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(
+                      top: 35.0, right: 30.0, bottom: 0.0, left: 30.0),
+                  child: ListTile(
+                    title: Text(
+                      post['title'],
+                      style: const TextStyle(fontSize: 25.0),
+                    ),
+                    subtitle: Text(
+                      post['date'],
+                      style: const TextStyle(fontSize: 16.0),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.only(
-                        top: 20.0, right: 30.0, bottom: 0.0, left: 30.0),
-                    child: Text(
-                      post['content'],
-                      style: const TextStyle(fontSize: 20.0),
-                    ),
-                  )
-                ],
-              ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(
+                      top: 20.0, right: 30.0, bottom: 0.0, left: 30.0),
+                  child: Text(
+                    post['content'],
+                    style: const TextStyle(fontSize: 20.0),
+                  ),
+                )
+              ],
             );
+            // return Scaffold(
+            // appBar: AppBar(
+            //   title: const Text('お知らせ'),
+            //   leading: IconButton(
+            //     icon: const Icon(Icons.close_sharp),
+            //     onPressed: () async {
+            //       ref.watch(currentIndexProvider.state).state = 1;
+            //       await Navigator.of(context).pushReplacement(
+            //         MaterialPageRoute(builder: (context) {
+            //           return const HomePage();
+            //         }),
+            //       );
+            //     },
+            //   ),
+            // ),
+            // body: Column(
+            //   children: [
+            //     Container(
+            //       padding: const EdgeInsets.only(
+            //           top: 35.0, right: 30.0, bottom: 0.0, left: 30.0),
+            //       child: ListTile(
+            //         title: Text(
+            //           post['title'],
+            //           style: const TextStyle(fontSize: 25.0),
+            //         ),
+            //         subtitle: Text(
+            //           post['date'],
+            //           style: const TextStyle(fontSize: 16.0),
+            //         ),
+            //       ),
+            //     ),
+            //     Container(
+            //       padding: const EdgeInsets.only(
+            //           top: 20.0, right: 30.0, bottom: 0.0, left: 30.0),
+            //       child: Text(
+            //         post['content'],
+            //         style: const TextStyle(fontSize: 20.0),
+            //       ),
+            //     )
+            //   ],
+            // ),
+            // );
           }
           return Center(
             child: Column(

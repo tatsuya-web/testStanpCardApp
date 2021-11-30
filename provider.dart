@@ -22,6 +22,10 @@ final currentIndexProvider = StateProvider.autoDispose((ref) {
   return 0;
 });
 
+final newsInnerPageProvider = StateProvider.autoDispose((ref) {
+  return 0;
+});
+
 final pointProvider = StreamProvider.autoDispose((ref) {
   final User user = FirebaseAuth.instance.currentUser!;
   return FirebaseFirestore.instance

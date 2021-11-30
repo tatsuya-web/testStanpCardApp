@@ -45,8 +45,18 @@ class StanpCardApp extends StatelessWidget {
     return MaterialApp(
       title: 'StanpCardApp',
       theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-      ),
+          primaryColor: Colors.black,
+          appBarTheme: const AppBarTheme(
+              shadowColor: Colors.transparent,
+              color: Colors.white,
+              titleTextStyle: TextStyle(color: Colors.black87, fontSize: 18.0),
+              iconTheme: IconThemeData(color: Colors.black87),
+              actionsIconTheme: IconThemeData(color: Colors.black87)),
+          scaffoldBackgroundColor: Colors.white,
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            selectedItemColor: Colors.black87,
+          ),
+          buttonTheme: const ButtonThemeData(buttonColor: Colors.grey)),
       home: const HomePage(),
     );
   }
