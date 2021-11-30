@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../provider.dart';
+import 'provider.dart';
 
 class BottomNav extends ConsumerWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -19,12 +19,15 @@ class BottomNav extends ConsumerWidget {
       onTap: (int index) async {
         switch (index) {
           case 0:
+            ref.watch(pageProvider.state).state = 0;
             ref.watch(currentIndexProvider.state).state = index;
             break;
           case 1:
+            ref.watch(pageProvider.state).state = 0;
             ref.watch(currentIndexProvider.state).state = index;
             break;
           case 2:
+            ref.watch(pageProvider.state).state = 0;
             ref.watch(currentIndexProvider.state).state = index;
             break;
         }

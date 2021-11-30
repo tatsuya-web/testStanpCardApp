@@ -17,7 +17,7 @@ class QRPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return (FirebaseAuth.instance.currentUser == null)
         ? const UnAuthPage()
-        : qrPageList[ref.watch(qrPageProvider.state).state];
+        : qrPageList[ref.watch(pageProvider.state).state];
   }
 }
 

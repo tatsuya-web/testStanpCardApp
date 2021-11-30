@@ -22,15 +22,7 @@ final currentIndexProvider = StateProvider.autoDispose((ref) {
   return 0;
 });
 
-final qrPageProvider = StateProvider.autoDispose((ref) {
-  return 0;
-});
-
-final newsPageProvider = StateProvider.autoDispose((ref) {
-  return 0;
-});
-
-final userPageProvider = StateProvider.autoDispose((ref) {
+final pageProvider = StateProvider.autoDispose((ref) {
   return 0;
 });
 

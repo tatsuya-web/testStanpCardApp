@@ -15,7 +15,7 @@ class UserPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return (FirebaseAuth.instance.currentUser == null)
         ? const UnAuthPage()
-        : userPageList[ref.watch(userPageProvider.state).state];
+        : userPageList[ref.watch(pageProvider.state).state];
   }
 }
 

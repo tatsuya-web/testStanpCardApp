@@ -4,31 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import './provider.dart';
-import './page/qr.dart';
-import './page/news.dart';
-import './page/user.dart';
-import './page/btmnav.dart';
-
-final List<Map<String, dynamic>> pageMap = [
-  {
-    'title': const Text('トップ'),
-    'page': const QRPage(),
-  },
-  {
-    'title': const Text('お知らせ'),
-    'page': const NewsPage(),
-  },
-  {
-    'title': const Text('ユーザー'),
-    'page': const UserPage(),
-  },
-];
-
-final Map<bool, Widget?> navigationBarMap = {
-  true: const BottomNav(),
-  false: null
-};
+import 'provider.dart';
+import 'page/qr.dart';
+import 'page/news.dart';
+import 'page/user.dart';
+import 'btmnav.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,24 +46,60 @@ class HomePage extends ConsumerWidget {
   const HomePage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final List<Map<String, dynamic>> pageMap = [
+      {
+        'title': const Text('トップ'),
+        'page': const QRPage(),
+        'appBarIcon': <List<IconButton>>[
+          [],
+        ],
+      },
+      {
+        'title': const Text('お知らせ'),
+        'page': const NewsPage(),
+        'appBarIcon': <List<IconButton>>[
+          [],
+          [
+            IconButton(
+                onPressed: () {
+                  ref.watch(pageProvider.state).state = 0;
+                },
+                icon: const Icon(Icons.close_sharp))
+          ],
+        ],
+      },
+      {
+        'title': const Text('ユーザー'),
+        'page': const UserPage(),
+        'appBarIcon': <List<IconButton>>[
+          [
+            IconButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  await Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) {
+                      return const HomePage();
+                    }),
+                  );
+                },
+                icon: const Icon(Icons.logout_sharp))
+          ],
+        ],
+      },
+    ];
+
+    final Map<bool, Widget?> navigationBarMap = {
+      true: const BottomNav(),
+      false: null
+    };
+
     return Scaffold(
         appBar: (FirebaseAuth.instance.currentUser != null)
             ? AppBar(
                 title: pageMap[ref.watch(currentIndexProvider.state).state]
                     ['title'],
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.logout_sharp),
-                    onPressed: () async {
-                      await FirebaseAuth.instance.signOut();
-                      await Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) {
-                          return const HomePage();
-                        }),
-                      );
-                    },
-                  ),
-                ],
+                actions: pageMap[ref.watch(currentIndexProvider.state).state]
+                    ['appBarIcon'][ref.watch(pageProvider.state).state],
               )
             : null,
         body: pageMap[ref.watch(currentIndexProvider.state).state]['page'],

@@ -18,7 +18,7 @@ class NewsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return (FirebaseAuth.instance.currentUser == null)
         ? const UnAuthPage()
-        : newsPageList[ref.watch(newsPageProvider.state).state];
+        : newsPageList[ref.watch(pageProvider.state).state];
   }
 }
 
@@ -40,8 +40,8 @@ class _NewsPage extends ConsumerWidget {
                 ),
                 subtitle: Text(document['date'].toString()),
                 onTap: () async {
+                  ref.watch(pageProvider.state).state = 1;
                   ref.watch(singleNewsProvider.state).state = document.id;
-                  ref.watch(newsPageProvider.state).state = 1;
                 },
               ),
             );
