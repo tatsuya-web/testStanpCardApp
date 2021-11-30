@@ -7,13 +7,17 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../provider.dart';
 import './auth.dart';
 
-class QRPage extends StatelessWidget {
+final List<Widget> qrPageList = [
+  _QRPage(),
+];
+
+class QRPage extends ConsumerWidget {
   const QRPage({Key? key}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return (FirebaseAuth.instance.currentUser == null)
         ? const UnAuthPage()
-        : _QRPage();
+        : qrPageList[ref.watch(qrPageProvider.state).state];
   }
 }
 

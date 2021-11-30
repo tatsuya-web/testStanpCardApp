@@ -5,13 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../provider.dart';
 import './auth.dart';
 
-class UserPage extends StatelessWidget {
+final List<Widget> userPageList = [
+  _UserPage(),
+];
+
+class UserPage extends ConsumerWidget {
   const UserPage({Key? key}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return (FirebaseAuth.instance.currentUser == null)
         ? const UnAuthPage()
-        : _UserPage();
+        : userPageList[ref.watch(userPageProvider.state).state];
   }
 }
 
