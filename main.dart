@@ -77,9 +77,12 @@ class HomePage extends ConsumerWidget {
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
                   await Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) {
-                      return const HomePage();
-                    }),
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const HomePage();
+                      },
+                      fullscreenDialog: true,
+                    ),
                   );
                 },
                 icon: const Icon(Icons.logout_sharp))

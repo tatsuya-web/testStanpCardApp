@@ -29,9 +29,12 @@ class UnAuthPage extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () async {
                   await Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) {
-                      return const LogInPage();
-                    }),
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const LogInPage();
+                      },
+                      fullscreenDialog: true,
+                    ),
                   );
                 },
                 child: const Text('ログイン'),
@@ -49,9 +52,12 @@ class UnAuthPage extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     await Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) {
-                        return const RegisterPage();
-                      }),
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const RegisterPage();
+                        },
+                        fullscreenDialog: true,
+                      ),
                     );
                   },
                   child: const Text('会員登録'),
@@ -135,9 +141,12 @@ class LogInPage extends ConsumerWidget {
                           .update({'loginDate': loginDate});
 
                       await Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) {
-                          return const HomePage();
-                        }),
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return const HomePage();
+                          },
+                          fullscreenDialog: true,
+                        ),
                       );
                     } catch (e) {
                       ref.read(infoTextProvider.state).state =
@@ -229,10 +238,13 @@ class RegisterPage extends ConsumerWidget {
                         'uid': userId,
                       });
 
-                      await Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) {
-                        return const HomePage();
-                      }));
+                      await Navigator.of(context)
+                          .pushReplacement(MaterialPageRoute(
+                        builder: (context) {
+                          return const HomePage();
+                        },
+                        fullscreenDialog: true,
+                      ));
                     } catch (e) {
                       ref.read(infoTextProvider.state).state =
                           "登録に失敗しました:${e.toString()}";
