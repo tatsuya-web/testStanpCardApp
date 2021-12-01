@@ -23,6 +23,7 @@ class StanpCardApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'StanpCardApp',
       theme: ThemeData(
           primaryColor: Colors.black,
@@ -48,14 +49,14 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final List<Map<String, dynamic>> pageMap = [
       {
-        'title': const Text('トップ'),
+        'title': const Text('Top'),
         'page': const QRPage(),
         'appBarIcon': <List<IconButton>>[
           [],
         ],
       },
       {
-        'title': const Text('お知らせ'),
+        'title': const Text('Info'),
         'page': const NewsPage(),
         'appBarIcon': <List<IconButton>>[
           [],
@@ -69,23 +70,19 @@ class HomePage extends ConsumerWidget {
         ],
       },
       {
-        'title': const Text('ユーザー'),
+        'title': const Text('User'),
         'page': const UserPage(),
         'appBarIcon': <List<IconButton>>[
           [
             IconButton(
-                onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
-                  await Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return const HomePage();
-                      },
-                      fullscreenDialog: true,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.logout_sharp))
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UserEditPage()),
+                );
+              },
+              icon: const Icon(Icons.more_horiz),
+            )
           ],
         ],
       },

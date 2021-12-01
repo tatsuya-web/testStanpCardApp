@@ -27,14 +27,10 @@ class UnAuthPage extends ConsumerWidget {
               padding: const EdgeInsets.all(8),
               alignment: Alignment.center,
               child: ElevatedButton(
-                onPressed: () async {
-                  await Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return const LogInPage();
-                      },
-                      fullscreenDialog: true,
-                    ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LogInPage()),
                   );
                 },
                 child: const Text('ログイン'),
@@ -50,14 +46,11 @@ class UnAuthPage extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 alignment: Alignment.center,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    await Navigator.of(context).pushReplacement(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
                       MaterialPageRoute(
-                        builder: (context) {
-                          return const RegisterPage();
-                        },
-                        fullscreenDialog: true,
-                      ),
+                          builder: (context) => const RegisterPage()),
                     );
                   },
                   child: const Text('会員登録'),
@@ -82,18 +75,6 @@ class LogInPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ログイン'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close_sharp),
-            onPressed: () async {
-              await Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) {
-                  return const HomePage();
-                }),
-              );
-            },
-          ),
-        ],
       ),
       body: Center(
         child: Container(
@@ -173,18 +154,6 @@ class RegisterPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('会員登録'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close_sharp),
-            onPressed: () async {
-              await Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) {
-                  return const HomePage();
-                }),
-              );
-            },
-          ),
-        ],
       ),
       body: Center(
         child: Container(

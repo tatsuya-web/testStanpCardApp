@@ -24,7 +24,23 @@ class _UserPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.read(userProvider.state).state;
     return Center(
-      child: Text('ユーザー情報 : ${user!.email}'),
+      child: Text('${user!.email}'),
+    );
+  }
+}
+
+class UserEditPage extends StatelessWidget {
+  const UserEditPage({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit'),
+      ),
+      body: SafeArea(
+          child: Column(
+        children: [],
+      )),
     );
   }
 }
